@@ -1,7 +1,7 @@
 import mongoose,{Schema} from "mongoose";
 
 const orderSchema = new Schema({
-    user:{
+    user_id:{
         type: Schema.Types.ObjectId,  
         ref:"User",
         required:true,
@@ -35,7 +35,11 @@ const orderSchema = new Schema({
                 },
             ]
         }
-    ]
+    ],
+    Total_price:{
+        type:Number,
+        required:true
+    }
     
 })
 

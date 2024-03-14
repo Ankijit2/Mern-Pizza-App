@@ -9,7 +9,6 @@ app.get('/',(req,res)=>{
   res.send("working")
 })
 
-console.log(process.env.GMAIL_USER)
 
 async function startServer() {
     await connectDB(); 
