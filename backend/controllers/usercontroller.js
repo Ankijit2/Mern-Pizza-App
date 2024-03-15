@@ -17,7 +17,7 @@ import { EmailSend } from "../utils/emailSender.js";
 
         user.refreshToken = refreshToken
         await user.save({validateBeforeSave:false})
-        return {acessToken,refreshToken}
+        return {accessToken,refreshToken}
     }catch(error){
         throw new ApiError(500,"Something went wrong generating tokens")
     }
@@ -65,7 +65,7 @@ import { EmailSend } from "../utils/emailSender.js";
         throw new  ApiError(500,"Failed to generate token")
      }
 
-    const registerEmailUrl = `http://localhost:${process.env.PORT}/api/user/${tokenData?.user_id}/verify/${tokenData?.Token}`
+    const registerEmailUrl = `http://localhost:${process.env.PORT}/api/user/register/${tokenData?.user_id}/verify/${tokenData?.Token}`
 
     const Verificationmail= await EmailSend(user.email, "Verification Link", `click to verify ${registerEmailUrl}`);
     if(!Verificationmail){
@@ -85,7 +85,119 @@ import { EmailSend } from "../utils/emailSender.js";
 
  const emailverifyController = AsyncHandler(async(req,res)=>{
     const {id,token}=req.params
-    const user=await Token.find(id)
+    const TokenLink=await Token.findOne({user_id:id});
+    if(!TokenLink || TokenLink.Token  !== token){
+        throw new ApiError(409,'Invalid link')
+    }
+   
+    let UserEmailVerify=await User.findById(id)
+    if(!UserEmailVerify){
+        throw new ApiError(400,"Acount not found")
+    }
+
+    UserEmailVerify.verified=true
+    await UserEmailVerify.save({validateBeforeSave:false})
+    await TokenLink.deleteOne({user_id:id})
+
+    return res.status(201).json(
+        new ApiResponse(200,null,"Account verified")
+    )
+
+
+
+
  })
 
- export{registerController}
+
+ const loginController =  AsyncHandler( async (req,res) =>{
+    const {email,password,confirmpassword}=req.body
+    if(confirmpassword!= password){
+        throw new ApiError(400,'Password does not match') 
+    }
+    if(!email){
+        throw new  ApiError(400,'Email is required')
+    }
+    const userLogin=await User.findOne({email:email})
+    if(!userLogin){
+        throw new ApiError(404,"This Email is not registered")
+    }
+    const isPasswordValid = await userLogin.isPasswordCorrect(password);
+    if(!isPasswordValid){
+        throw new ApiError(401,"Incorrect Password")
+    }
+    const {accessToken,refreshToken}= generateTokens(userLogin._id)
+
+    const loggedInUser = await User.findById(userLogin._id).select('-password -refreshToken')
+
+    const options = {
+        httpOnly:true,
+        secure:true
+    }
+
+    return res.status(200).cookie("accessToken",accessToken,options)
+    .cookie("refreshToken",refreshToken,options)
+    .json(new ApiResponse(200,{user:loggedInUser,accessToken,refreshToken},"Logged In Suceesfully"))
+ })
+
+const logoutController =AsyncHandler(async(req,res)=>{
+    await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $unset:{
+                refreshtoken:1
+            }
+        },{
+            new:true
+        }
+    )
+    const options = {
+        httpOnly:true,
+        secure:true
+    }
+
+    return res.status(200).clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiResponse(200, {}, "User logged Out"))
+})
+
+
+const newtokenController = AsyncHandler(async(req,res)=>{
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+
+    if(!incomingRefreshToken){
+        throw new ApiError(401,"unauthorized request")
+    }
+        try{
+            const decodedToken = jwt.verify(incomingRefreshToken,process.env.REFRESH_TOKEN_SECRET
+
+            )
+            const user = await User.findById(decodedToken?.__id)
+            if(!user){
+                throw new Error(401,"Invalid refresh token")
+            }
+            if(user?.refreshtoken!==incomingRefreshToken){
+                throw new ApiError(401,"Refresh token is expired or used")
+            }
+            const options={
+                httpOnly:true,
+                secure:true
+            }
+            const {accessToken,newRefreshtoken} = await generateTokens(user._id)
+            
+            return res.status(200)
+            .cookie("accessToken",accessToken,options)
+            .cookie("refreshToken",newRefreshtoken,options)
+            .json(
+                new ApiResponse(
+                    200,
+                    {accessToken,refreshToken:newRefreshtoken},
+                    "acessToken refreshed"
+                )
+            )
+        }catch(error){
+            throw new ApiError(491,error?.message || "Invalid refresh token")
+        }
+    
+})
+
+ export{registerController,emailverifyController,loginController,logoutController,newtokenController}

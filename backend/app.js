@@ -21,6 +21,7 @@ app.use(cookieParser())
 import userRoute from './routes/userroute.js'
 
 
+
 //routedeclaration
 app.use('/api/user', userRoute)
 
