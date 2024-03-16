@@ -5,33 +5,33 @@ import { User } from "../models/usermodel.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Token } from "../models/Tokenmodel.js";
-// import  jwt from 'jsonwebtoken';
+import  jwt from 'jsonwebtoken';
 import { EmailSend } from "../utils/emailSender.js";
 
 
  const generateTokens = async(userId)=>{
     try{
-        const user = User.findById(userId);
-        const acessToken = user.generateAccessToken()
+        const user =await User.findById(userId)
+        const accessToken = user.generateAccessToken()
         const refreshToken = user.generateRefreshToken()
 
-        user.refreshToken = refreshToken
+        user.refreshtoken = refreshToken
         await user.save({validateBeforeSave:false})
         return {accessToken,refreshToken}
     }catch(error){
-        throw new ApiError(500,"Something went wrong generating tokens")
+        throw new ApiError(500,"Something went wrong while generating tokens")
     }
  }
 
  const registerController = AsyncHandler(async(req,res)=>{
     const {fullname,username,email,password,confirmpassword}=req.body
+    if([fullname,username,email,password,confirmpassword].some((field)=>field?.trim()==="")){
+        throw new ApiError(400,'Fill all fields')
+    }
     if(password!=confirmpassword){ 
         throw new ApiError(400,'Password does not match')
     }
 
-    if([fullname,username,email,password,confirmpassword].some((field)=>field?.trim()==="")){
-        throw new ApiError(400,'Fill all fields')
-    }
     if([fullname,username,email,password,confirmpassword].some((field)=>field===undefined)){
         throw new ApiError(400,'undefined fields')
     }
@@ -110,10 +110,8 @@ import { EmailSend } from "../utils/emailSender.js";
 
 
  const loginController =  AsyncHandler( async (req,res) =>{
-    const {email,password,confirmpassword}=req.body
-    if(confirmpassword!= password){
-        throw new ApiError(400,'Password does not match') 
-    }
+    const {email,password}=req.body
+  
     if(!email){
         throw new  ApiError(400,'Email is required')
     }
@@ -125,7 +123,8 @@ import { EmailSend } from "../utils/emailSender.js";
     if(!isPasswordValid){
         throw new ApiError(401,"Incorrect Password")
     }
-    const {accessToken,refreshToken}= generateTokens(userLogin._id)
+    const {accessToken,refreshToken}= await generateTokens(userLogin._id)
+    console.log(accessToken,refreshToken)
 
     const loggedInUser = await User.findById(userLogin._id).select('-password -refreshToken')
 
@@ -134,7 +133,8 @@ import { EmailSend } from "../utils/emailSender.js";
         secure:true
     }
 
-    return res.status(200).cookie("accessToken",accessToken,options)
+    return res.status(200)
+    .cookie("accessToken",accessToken,options)
     .cookie("refreshToken",refreshToken,options)
     .json(new ApiResponse(200,{user:loggedInUser,accessToken,refreshToken},"Logged In Suceesfully"))
  })
@@ -154,8 +154,10 @@ const logoutController =AsyncHandler(async(req,res)=>{
         httpOnly:true,
         secure:true
     }
-
-    return res.status(200).clearCookie("accessToken", options)
+console.log(refreshToken)
+    return res
+    .status(200)
+    .clearCookie("accessToken", options)
     .clearCookie("refreshToken", options)
     .json(new ApiResponse(200, {}, "User logged Out"))
 })
