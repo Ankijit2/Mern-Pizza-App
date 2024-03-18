@@ -31,7 +31,7 @@ function Navbar() {
 
   return (
     <>
-      <nav className='flex justify-between px-10 py-3 text-white items-center'>
+      <nav className='flex justify-between px-10 py-3 relative text-white items-center'>
        <img src="./images/logo.png" alt="" className='w-32' id='logo'/>
         <div className='flex gap-20'>
           {Navitems.map((item, index) => {

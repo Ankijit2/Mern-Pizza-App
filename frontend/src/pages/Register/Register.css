@@ -1,0 +1,26 @@
+
+form{
+    margin: 8px 0;
+    font-family: Roboto;
+    
+}
+
+#register div{
+    margin: 10px 0;
+}
+
+#register input{
+    width:100%;
+    padding: 6px;
+    height: 40px;
+    color:#f8a625;
+}
+
+
+#register label{
+    font-size: 18px;
+}
+
+#register input:focus{
+    outline: none;
+}
