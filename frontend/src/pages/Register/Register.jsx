@@ -71,14 +71,14 @@ function Register() {
                     />
                 </div>
 
-                <Buttoncomp type="submit">
-                    Create Your Account
+                <Buttoncomp type="submit" addedclass='w-fit m-auto'>
+                    Create Account
                 </Buttoncomp>
 
 
             </form>
 
-            <div>Already have an account? <Buttoncomp>Sign in</Buttoncomp></div>
+            <div className='sign'>Already have an account? <Buttoncomp>Sign in</Buttoncomp></div>
         </div>
     )
 }
