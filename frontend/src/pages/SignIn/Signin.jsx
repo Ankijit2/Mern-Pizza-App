@@ -12,7 +12,7 @@ function Signin() {
         console.log(data)
     }
   return (
-    <div className='flex flex-col items-center text-white mt-12' id="register">
+    <div className='flex flex-col items-center text-white mt-12' id="signin">
     <p className='text-3xl font-bold tracking-widest'>Login to your account</p>
 
     <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col w-2/4 justify-center'>
@@ -56,6 +56,7 @@ function Signin() {
 
 
     </form>
+    <div className='sign'><Buttoncomp>Forgot Password</Buttoncomp></div>
 
     <div className='sign'>Don&apos;t have an account? <Buttoncomp>Register</Buttoncomp></div>
 </div>

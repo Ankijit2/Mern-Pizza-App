@@ -5,11 +5,11 @@ form{
     
 }
 
-#register div{
+#signin div{
     margin: 10px 0;
 }
 
-#register input{
+#signin input{
     width:100%;
     padding: 6px;
     height: 40px;
@@ -17,11 +17,11 @@ form{
 }
 
 
-#register label{
+#signin label{
     font-size: 18px;
 }
 
-#register input:focus{
+#signin input:focus{
     outline: none;
 }
 

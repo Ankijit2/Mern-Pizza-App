@@ -6,11 +6,8 @@ const orderSchema = new Schema({
         ref:"User",
         required:true,
     },
-    createdAt:{
-        type:Date,
-        default: Date.now
-    },
-    pizzas:[
+  
+    Custompizza:[
         {
             base:{
                 type:Schema.Types.ObjectId,
@@ -36,10 +33,28 @@ const orderSchema = new Schema({
             ]
         }
     ],
+    Pizza:[
+        {
+            type:Schema.Types.ObjectId,
+            ref:'Pizza',
+            required:true
+        }
+
+    ],
     Total_price:{
         type:Number,
         required:true
-    }
+    },
+    OrderStatus:{
+        type:String,
+        required:true,
+        enum:["Order received","In the Kitchen","Sent to delivery"],
+        default:"Order received"
+    },
+    createdAt:{
+        type:Date,
+        default: Date.now
+    },
     
 })
 
