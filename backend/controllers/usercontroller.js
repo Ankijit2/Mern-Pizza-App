@@ -2,9 +2,11 @@ import mongoose from "mongoose";
 import crypto from "crypto";
 import { AsyncHandler } from "../utils/AsyncHandler.js";
 import { User } from "../models/usermodel.js";
+import {Order} from "../models/ordermodel.js"
+import { Token } from "../models/Tokenmodel.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
-import { Token } from "../models/Tokenmodel.js";
+
 import jwt from "jsonwebtoken";
 import { EmailSend } from "../utils/emailSender.js";
 
@@ -240,6 +242,7 @@ const forgotpassowrdController = AsyncHandler(async (req, res) => {
     "Password Reset Request",
     `<a href=${url}>Click here to reset your password</a>`
   );
+  return res.staus(200).json(new ApiResponse(200, {}, "Password reset link sent to your email"));
 });
 
 const forgotpassowrdverificationController = AsyncHandler(async (req, res) => {
@@ -265,6 +268,24 @@ const forgotpassowrdverificationController = AsyncHandler(async (req, res) => {
 });
 
 const userOrderController = AsyncHandler(async(req,res)=>{
+  const {username} = req.params
+  const userOrderdata = User.aggregate([
+    {
+      $match:{
+        username
+      }
+    },
+    {
+      $lookup:{
+        from: "orders",
+        localField:"_id",
+        foreignField:"user_id",
+        as:"orders"
+
+    }}
+  ])
+
+  return res.status(200).json(new ApiResponse(200,{userOrderdata},"user order data"))
 
 })
 
@@ -277,4 +298,5 @@ export {
   newtokenController,
   forgotpassowrdController,
   forgotpassowrdverificationController,
+  userOrderController
 };

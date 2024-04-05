@@ -6,33 +6,7 @@ const orderSchema = new Schema({
         ref:"User",
         required:true,
     },
-  
-    Custompizza:[
-        {
-            base:{
-                type:Schema.Types.ObjectId,
-                ref:'Ingredient',
-                required:true,
-            },
-            sauce:{
-                type:Schema.Types.ObjectId,
-                ref:'Ingredient',
-                required:true
 
-            },
-            cheese:{
-                type:Schema.Types.ObjectId,
-                ref:'Ingredient',
-                required:true
-            },
-            veggies:[
-                {
-                    type:Schema.Types.ObjectId,
-                    ref:'Ingredient'
-                },
-            ]
-        }
-    ],
     Pizza:[
         {
             type:Schema.Types.ObjectId,
@@ -40,6 +14,13 @@ const orderSchema = new Schema({
             required:true
         }
 
+    ],
+    ingredient:[
+        {
+            type:Schema.Types.ObjectId,
+            ref:'Ingredient',
+            required:true
+        }
     ],
     Total_price:{
         type:Number,

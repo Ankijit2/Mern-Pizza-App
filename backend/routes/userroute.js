@@ -7,6 +7,7 @@ import {
   newtokenController,
   forgotpassowrdController,
   forgotpassowrdverificationController,
+  userOrderController
 } from "../controllers/usercontroller.js";
 import { verifyJWT } from "../middleware/authmiddleware.js";
 
@@ -21,5 +22,6 @@ router.route("/forgotpassword").post(forgotpassowrdController);
 router
   .route("/forgotpassword/:id/verify/:token")
   .post(forgotpassowrdverificationController);
+router.route("/userorder/:username").get(userOrderController);
 
 export default router;
